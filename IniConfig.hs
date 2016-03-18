@@ -30,8 +30,7 @@ instance Monoid Config where
 -- | Parse a configuration from a 'String'.
 parseConfig :: String -> Maybe Config
 parseConfig s = case parseSections s of
-    []      -> pure $ Config [] []
-    def : r -> Config <$> parseSectionOptions def <*> mapM parseSection r
+    (def, r) -> Config <$> parseSectionOptions def <*> mapM parseSection r
 
 parseSection :: [String] -> Maybe (String, SAssocList String)
 parseSection ls = case ls of
@@ -52,12 +51,15 @@ parseOption s = case break (== '=') s of
 parseSectionTitle :: String -> String
 parseSectionTitle = init . drop 1
 
-parseSections :: String -> [[String]]
-parseSections s = case span notSection $ filter ((||) <$> not . null <*> (maybe False (`notElem` ";#") . listToMaybe)) $ lines s of
-        (defs, r) -> defs : chop splitSection r
+parseSections :: String -> ([String], [[String]])
+parseSections s =
+    fmap (chop splitSection) $ span notSection
+                             $ filter 
+                             $ lines s
   where
-    splitSection = takeWhile1 notSection &&& dropWhile notSection . drop 1
-    notSection   = (/= '[') . head
+    isCommentOrEmpty      = (||) <$> not . null <*> (maybe False (`notElem` ";#") . listToMaybe)
+    splitSection          = takeWhile1 notSection &&& dropWhile notSection . drop 1
+    notSection            = (/= '[') . head
 
     -- | Ignore the first element, but add it anyway.
     takeWhile1 p (x : xs) = x : takeWhile p xs
