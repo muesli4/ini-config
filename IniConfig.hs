@@ -31,7 +31,7 @@ instance Monoid Config where
 
 -- | Parse a configuration from a 'String'.
 parseConfig :: String -> Either String Config
-parseConfig s = case parseSections s of
+parseConfig s = case splitSections s of
     (def, r) -> Config <$> parseSectionOptions def <*> mapM parseSection r
 
 parseSection :: [String] -> Either String (String, SAssocList String)
@@ -55,13 +55,13 @@ parseSectionTitle l = case break (== ']') $ drop 1 l of
     (title, "]") -> Right title
     _            -> Left "expected ']' to end section header"
 
-parseSections :: String -> ([String], [[String]])
-parseSections s =
+splitSections :: String -> ([String], [[String]])
+splitSections s =
     fmap (chop splitSection) $ span notSection
-                             $ filter isCommentOrEmpty
+                             $ filter isRelevantLine
                              $ lines s
   where
-    isCommentOrEmpty      = (||) <$> not . null <*> (maybe False (`notElem` ";#") . listToMaybe)
+    isRelevantLine        = (&&) <$> not . null <*> (maybe True (`notElem` ";#") . listToMaybe)
     splitSection          = takeWhile1 notSection &&& dropWhile notSection . drop 1
     notSection            = (/= '[') . head
 
