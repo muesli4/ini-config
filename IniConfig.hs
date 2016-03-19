@@ -12,6 +12,7 @@ import Data.List
 import Data.List.Split
 import Data.Maybe
 import Data.Ord
+import Safe
 
 type SAssocList a = [(String, a)]
 
@@ -34,7 +35,7 @@ parseConfig s = case parseSections s of
 
 parseSection :: [String] -> Maybe (String, SAssocList String)
 parseSection ls = case ls of
-    header : cLines -> (,) (parseSectionTitle header) <$> parseSectionOptions cLines
+    header : cLines -> (,) <$> parseSectionTitle header <*> parseSectionOptions cLines
     _               -> Nothing
 
 parseSectionOptions :: [String] -> Maybe (SAssocList String)
@@ -48,13 +49,13 @@ parseOption s = case break (== '=') s of
     trim      = reverse . trimFront . reverse . trimFront
     trimFront = dropWhile (== ' ')
 
-parseSectionTitle :: String -> String
-parseSectionTitle = init . drop 1
+parseSectionTitle :: String -> Maybe String
+parseSectionTitle = initMay . drop 1
 
 parseSections :: String -> ([String], [[String]])
 parseSections s =
     fmap (chop splitSection) $ span notSection
-                             $ filter 
+                             $ filter isCommentOrEmpty
                              $ lines s
   where
     isCommentOrEmpty      = (||) <$> not . null <*> (maybe False (`notElem` ";#") . listToMaybe)

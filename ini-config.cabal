@@ -60,7 +60,7 @@ library
   -- other-extensions:    
   
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.8 && <4.9, split >=0.2 && <0.3
+  build-depends:       base >=4.8 && <4.9, split >=0.2 && <0.3, safe >=0.2 && <=0.3.9
   
   -- Directories containing source files.
   -- hs-source-dirs:      
