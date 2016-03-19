@@ -29,28 +29,30 @@ instance Monoid Config where
         merge = foldr $ insertBy $ comparing fst
 
 -- | Parse a configuration from a 'String'.
-parseConfig :: String -> Maybe Config
+parseConfig :: String -> Either String Config
 parseConfig s = case parseSections s of
     (def, r) -> Config <$> parseSectionOptions def <*> mapM parseSection r
 
-parseSection :: [String] -> Maybe (String, SAssocList String)
+parseSection :: [String] -> Either String (String, SAssocList String)
 parseSection ls = case ls of
     header : cLines -> (,) <$> parseSectionTitle header <*> parseSectionOptions cLines
-    _               -> Nothing
+    _               -> Left "not a section"
 
-parseSectionOptions :: [String] -> Maybe (SAssocList String)
+parseSectionOptions :: [String] -> Either String (SAssocList String)
 parseSectionOptions = mapM parseOption
 
-parseOption :: String -> Maybe (String, String)
+parseOption :: String -> Either String (String, String)
 parseOption s = case break (== '=') s of
-    (name, '=' : value) -> Just (trim name, trim value)
-    _                   -> Nothing
+    (name, '=' : value) -> Right (trim name, trim value)
+    _                   -> Left "expected a key-value pair seperated by '='"
   where
     trim      = reverse . trimFront . reverse . trimFront
     trimFront = dropWhile (== ' ')
 
-parseSectionTitle :: String -> Maybe String
-parseSectionTitle = initMay . drop 1
+parseSectionTitle :: String -> Either String String
+parseSectionTitle l = case break (== ']') $ drop 1 l of
+    (title, "]") -> Right title
+    _            -> Left "expected ']' to end section header"
 
 parseSections :: String -> ([String], [[String]])
 parseSections s =
@@ -75,7 +77,7 @@ formatConfig (Config ds ss) = unlines $ intersperse "" $ formatEntries ds ++ map
     formatEntry (name, value) = name ++ " = " ++ value
 
 -- | Read a configuration from a file.
-readConfigFile :: FilePath -> IO (Maybe Config)
+readConfigFile :: FilePath -> IO (Either String Config)
 readConfigFile = fmap parseConfig . readFile
 
 -- | Write a configuration to a file.
