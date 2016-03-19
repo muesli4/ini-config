@@ -26,7 +26,8 @@ instance Monoid Config where
     mappend (Config defL sL) (Config defR sR)
            = Config (defL ++ defR) $ map (fst . head &&& concatMap snd) $ groupBy ((==) `on` fst) $ merge sL sR
       where
-        merge = foldr $ insertBy $ comparing fst
+        merge l = foldr (insertBy cmpFst) l . sortBy cmpFst
+        cmpFst  = comparing fst
 
 -- | Parse a configuration from a 'String'.
 parseConfig :: String -> Either String Config
