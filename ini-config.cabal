@@ -10,7 +10,7 @@ name:                ini-config
 -- PVP summary:      +-+------- breaking API changes
 --                   | | +----- non-breaking API additions
 --                   | | | +--- code changes with no API change
-version:             0.3.0.2
+version:             0.3.0.3
 
 -- A short (one-line) description of the package.
 synopsis:            Very simple ini-style configuration parser and formatter.
@@ -50,8 +50,9 @@ cabal-version:       >=1.10
 
 
 library
+  hs-source-dirs:      src/
   -- Modules exported by the library.
-  exposed-modules:     IniConfig
+  exposed-modules:     Text.Config.Ini
   
   -- Modules included in this library but not exported.
   -- other-modules:       
@@ -60,7 +61,7 @@ library
   -- other-extensions:    
   
   -- Other library packages from which modules are imported.
-  build-depends:       base >=4.8 && <4.9, split >=0.2 && <0.3, safe >=0.2 && <=0.3.9
+  build-depends:       base >=4.8, split >=0.2, safe >=0.2
   
   -- Directories containing source files.
   -- hs-source-dirs:      
