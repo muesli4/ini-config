@@ -7,7 +7,7 @@ import Data.Ord
 
 type SAssocList a = [(String, a)]
 
--- An entry in a config may appear multiple times and appears in the order in
+-- | An entry in a config may appear multiple times and appears in the order in
 -- which it was defined in the config file.
 data Config = Config
             { defEntries :: SAssocList String

@@ -52,7 +52,7 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src/
   -- Modules exported by the library.
-  exposed-modules:     Text.Config.Ini
+  exposed-modules:     Text.Config.Ini, Text.Config.Ini.Common, Text.Config.Ini.Builder
   
   -- Modules included in this library but not exported.
   -- other-modules:       
