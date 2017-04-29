@@ -5,6 +5,8 @@ import Data.Function
 import Data.List
 import Data.Ord
 
+-- TODO the monoid instance of config merges sections, is that desired?
+
 type SAssocList a = [(String, a)]
 
 -- | An entry in a config may appear multiple times and appears in the order in
