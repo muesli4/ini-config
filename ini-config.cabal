@@ -13,7 +13,7 @@ name:                ini-config
 version:             0.3.1.0
 
 -- A short (one-line) description of the package.
-synopsis:            Very simple ini-style configuration parser and formatter.
+synopsis:            Tiny and simplistic ini-style configuration parser and formatter based on String.
 
 -- A longer description of the package.
 description:         A configuration file formatter and parser using mostly the base package. Supports sections in square brackets at line start, default section on top, key-value pairs with equal sign and arbitrary other characters but spaces get trimmed.
@@ -22,7 +22,7 @@ description:         A configuration file formatter and parser using mostly the 
 homepage:            https://github.com/muesli4/ini-config
 
 -- The license under which the package is released.
-license:             PublicDomain
+license:             BSD3
 
 -- The file containing the license text.
 license-file:        LICENSE
