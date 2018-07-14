@@ -1,20 +1,29 @@
+-- | Core interface for dealing with 'Config'.
 module Text.Config.Ini
-    ( Config (Config)
+    ( Config (..)
     , parseConfig
     , formatConfig
     , readConfigFile
     , writeConfigFile
+    , module Text.Config.Ini.Extract
+    , module Text.Config.Ini.Builder
     ) where
 
-import Control.Arrow
+import Data.Bifunctor
+import Control.Arrow hiding (second)
 import Data.List
 import Data.List.Split
 import Data.Maybe
 import Safe
 
 import Text.Config.Ini.Common
+import Text.Config.Ini.Extract
+import Text.Config.Ini.Builder
 
 -- | Parse a configuration from a 'String'.
+--
+-- >>> parseConfig "foo = 42\n[bar]\nbaz = qux"
+-- Right (Config {cGlobalSection = [("foo","42")], cSections = [("bar",[("baz","qux")])]})
 parseConfig :: String -> Either String Config
 parseConfig s = case splitSections s of
     (def, r) -> Config <$> parseSectionOptions def <*> mapM parseSection r
@@ -22,7 +31,7 @@ parseConfig s = case splitSections s of
 parseSection :: [String] -> Either String (String, SAssocList String)
 parseSection ls = case ls of
     header : cLines -> (,) <$> parseSectionTitle header <*> parseSectionOptions cLines
-    _               -> Left "not a section"
+    []              -> Left "not a section"
 
 parseSectionOptions :: [String] -> Either String (SAssocList String)
 parseSectionOptions = mapM parseOption
@@ -42,11 +51,13 @@ parseSectionTitle l = case break (== ']') $ drop 1 l of
     (title, "]") -> Right title
     _            -> Left "expected ']' to end section header"
 
+-- | Splits off the global section lines with 'splitSection' and then repeatedly
+-- does the same for the remaining sections.
 splitSections :: String -> ([String], [[String]])
 splitSections s =
-    fmap (chop splitSection) $ span notSection
-                             $ filter isRelevantLine
-                             $ lines s
+    second (chop splitSection) $ span notSection
+                               $ filter isRelevantLine
+                               $ lines s
   where
     isRelevantLine        = maybe False (`notElem` ";#") . listToMaybe
     splitSection          = takeWhile1 notSection &&& dropWhile notSection . drop 1
